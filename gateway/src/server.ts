@@ -124,7 +124,15 @@ async function readForm(request: IncomingMessage): Promise<URLSearchParams> {
 }
 
 function sameOrigin(request: IncomingMessage, config: GatewayConfig): boolean {
-  return request.headers.origin === config.publicOrigin;
+  const origin = request.headers.origin;
+  if (origin !== undefined) return origin === config.publicOrigin;
+
+  // Safari can omit Origin on a same-origin HTML form submission. Fetch
+  // Metadata is browser-controlled, so only use this fallback when the
+  // request still targets the configured public host.
+  if (request.headers["sec-fetch-site"] !== "same-origin") return false;
+  const expectedHost = new URL(config.publicOrigin).host.toLowerCase();
+  return request.headers.host?.toLowerCase() === expectedHost;
 }
 
 function wantsHtml(request: IncomingMessage): boolean {

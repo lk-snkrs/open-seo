@@ -1,4 +1,8 @@
-import type { IncomingMessage, ServerResponse } from "node:http";
+import {
+  request as httpRequest,
+  type IncomingMessage,
+  type ServerResponse,
+} from "node:http";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createGatewayServer,
@@ -66,6 +70,37 @@ function sessionCookie(email = "seo@lksneakers.com.br") {
     config.sessionTtlSeconds,
   );
   return `${SESSION_COOKIE_NAME}=${token}`;
+}
+
+async function postFormWithoutFetchDefaults(
+  baseUrl: string,
+  headers: Record<string, string>,
+): Promise<number> {
+  const target = new URL("/login", baseUrl);
+  const body = new URLSearchParams({
+    email: "seo@lksneakers.com.br",
+    password: "correct horse battery staple",
+  }).toString();
+
+  return new Promise<number>((resolve, reject) => {
+    const request = httpRequest(
+      target,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Length": Buffer.byteLength(body).toString(),
+        },
+      },
+      (response) => {
+        response.resume();
+        response.on("end", () => resolve(response.statusCode ?? 0));
+      },
+    );
+    request.on("error", reject);
+    request.end(body);
+  });
 }
 
 describe("gateway request boundary", () => {
@@ -138,6 +173,59 @@ describe("gateway request boundary", () => {
     expect(outsider.status).toBe(403);
     expect(outsider.headers.get("set-cookie")).toBeNull();
     expect(proxyHttp).not.toHaveBeenCalled();
+  });
+
+  it("accepts Safari same-origin form posts when Origin is omitted", async () => {
+    const signIn = vi.fn(async (email: string) => ({ id: "user-1", email }));
+    const { baseUrl } = await start({ signIn });
+
+    const status = await postFormWithoutFetchDefaults(baseUrl, {
+      Host: "seo.lksneakers.com.br",
+      "Sec-Fetch-Site": "same-origin",
+    });
+
+    expect(status).toBe(303);
+    expect(signIn).toHaveBeenCalledOnce();
+  });
+
+  it("rejects cross-site or wrong-host form posts without Origin", async () => {
+    const signIn = vi.fn(async (email: string) => ({ id: "user-1", email }));
+    const { baseUrl } = await start({ signIn });
+
+    const crossSiteStatus = await postFormWithoutFetchDefaults(baseUrl, {
+      Host: "seo.lksneakers.com.br",
+      "Sec-Fetch-Site": "cross-site",
+    });
+    const wrongHostStatus = await postFormWithoutFetchDefaults(baseUrl, {
+      Host: "attacker.example",
+      "Sec-Fetch-Site": "same-origin",
+    });
+
+    expect(crossSiteStatus).toBe(403);
+    expect(wrongHostStatus).toBe(403);
+    expect(signIn).not.toHaveBeenCalled();
+  });
+
+  it("does not fall back when an explicit Origin is wrong", async () => {
+    const signIn = vi.fn(async (email: string) => ({ id: "user-1", email }));
+    const { baseUrl } = await start({ signIn });
+
+    const response = await fetch(`${baseUrl}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Host: "seo.lksneakers.com.br",
+        Origin: "https://attacker.example",
+        "Sec-Fetch-Site": "same-origin",
+      },
+      body: new URLSearchParams({
+        email: "seo@lksneakers.com.br",
+        password: "correct horse battery staple",
+      }),
+    });
+
+    expect(response.status).toBe(403);
+    expect(signIn).not.toHaveBeenCalled();
   });
 
   it("protects MCP with its dedicated bearer token only", async () => {

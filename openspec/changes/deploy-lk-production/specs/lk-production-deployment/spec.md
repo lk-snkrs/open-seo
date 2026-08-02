@@ -36,6 +36,13 @@ emails in the production allowlist before proxying HTTP or WebSocket traffic.
 - **WHEN** a valid Supabase user is not in the allowlist
 - **THEN** the gateway returns `403` and never contacts the OpenSEO core
 
+#### Scenario: Safari omits Origin on same-origin login
+
+- **WHEN** Safari submits the login form without `Origin` but with trusted
+  same-origin Fetch Metadata to the configured public host
+- **THEN** the gateway accepts the CSRF boundary and continues authentication
+- **AND** cross-site, wrong-host or explicitly mismatched-origin requests remain denied
+
 ### Requirement: Separate machine authentication
 
 The gateway SHALL protect MCP with a dedicated bearer token and the core SHALL

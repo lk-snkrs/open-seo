@@ -38,7 +38,7 @@
 
 ## 7. Domínio e LK-HUB
 
-- [ ] 7.1 Associar `seo.lksneakers.com.br`, aplicar CNAME/TXT na GoDaddy e validar TLS.
+- [x] 7.1 Associar `seo.lksneakers.com.br`, aplicar CNAME/TXT na GoDaddy e validar TLS.
 - [x] 7.2 Criar change OpenSpec do LK-HUB, adicionar link externo por papel e testes.
 - [x] 7.3 Publicar LK-HUB na Vercel e validar desktop/mobile autenticados.
 
