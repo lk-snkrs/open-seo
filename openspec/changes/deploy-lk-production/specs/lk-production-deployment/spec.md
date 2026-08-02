@@ -3,7 +3,8 @@
 ### Requirement: Private persistent OpenSEO core
 
 The system SHALL run the pinned OpenSEO Docker release on Railway without a
-public domain and SHALL persist `/app/.wrangler` on a backed-up volume.
+public domain, SHALL persist `/app/.wrangler` on a Railway volume and SHALL
+keep an off-platform snapshot before any stateful upgrade.
 
 #### Scenario: Core cannot be reached from the internet
 
@@ -14,6 +15,11 @@ public domain and SHALL persist `/app/.wrangler` on a backed-up volume.
 
 - **WHEN** the OpenSEO service is redeployed after a project has been created
 - **THEN** the project, integrations and historical snapshots remain available
+
+#### Scenario: Stateful upgrade is prepared
+
+- **WHEN** an operator prepares an upstream upgrade or destructive migration
+- **THEN** a fresh private off-platform volume snapshot is verified before deployment
 
 ### Requirement: Authenticated human access
 

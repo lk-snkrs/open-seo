@@ -3,8 +3,9 @@
 O upstream roda em Cloudflare Workers ou em Docker local. No Docker, o estado é
 mantido por Miniflare em `.wrangler`, `AUTH_MODE=local_noauth` injeta um admin e
 o handler `scheduled` não recebe eventos. O Railway suporta Docker, rede privada,
-volumes, backups, custom domains e crons, portanto permite produção com poucas
-adaptações.
+volumes, custom domains e crons, portanto permite produção com poucas adaptações.
+O workspace atual não autoriza backups nativos de volume; a recuperação usa
+snapshot externo privado antes de mudanças stateful.
 
 ## Goals / Non-Goals
 
@@ -67,7 +68,7 @@ recalculado antes de decisões estratégicas para não congelar sazonalidade.
 ### Fork fixado e atualizações controladas
 
 Produção inicia em `v0.1.3`. Atualizações futuras entram por PR desde `upstream`,
-executam testes e snapshot de volume antes do deploy.
+executam testes e snapshot externo do volume antes do deploy.
 
 ## Threat Model
 
@@ -77,7 +78,7 @@ executam testes e snapshot de volume antes do deploy.
 - Vazamento de token MCP/cron: secrets separados, sem logs, rotacionáveis.
 - SSRF/proxy aberto: destino do proxy é constante e privado; Host não vem do usuário.
 - Replay/concorrência cron: secret + proteção nativa de run ativa.
-- Perda de SQLite: volume, backups diário/semanal e snapshot antes de upgrades.
+- Perda de SQLite: volume persistente e snapshot externo privado verificado antes de upgrades stateful.
 
 ## Error Handling
 
@@ -93,16 +94,16 @@ executam testes e snapshot de volume antes do deploy.
 1. Testar fork e gateway localmente.
 2. Provisionar Railway sem domínio público no núcleo.
 3. Validar domínio Railway temporário do gateway.
-4. Configurar secrets, volume e backups.
+4. Configurar secrets e volume; capturar e verificar o snapshot externo inicial.
 5. Configurar LK e integrações; capturar baseline.
 6. Criar DNS `seo`, validar SSL e acesso.
 7. Adicionar link no LK-HUB e publicar.
 
 ## Rollback
 
-Rollback por deployment anterior no Railway e snapshot do volume. O DNS `seo`
-é isolado; removê-lo não afeta nenhuma outra superfície LK. O link do HUB é uma
-mudança independente e reversível.
+Rollback por deployment anterior no Railway e restauração do snapshot externo
+no volume. O DNS `seo` é isolado; removê-lo não afeta nenhuma outra superfície
+LK. O link do HUB é uma mudança independente e reversível.
 
 ## Open Questions
 

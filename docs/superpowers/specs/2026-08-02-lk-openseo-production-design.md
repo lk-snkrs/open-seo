@@ -47,9 +47,11 @@ proteção nativa contra execução concorrente permanece a fonte de verdade.
 ## Dados e segredos
 
 O D1/SQLite local do upstream é suficiente para a primeira versão e reduz
-divergência; Supabase não armazenará os dados do OpenSEO. O volume Railway terá
-backups diário e semanal. Secrets ficam apenas no Doppler e nas variáveis do
-Railway, nunca no Git.
+divergência; Supabase não será o banco primário do OpenSEO. O estado primário
+fica no volume Railway e snapshots externos ficam em bucket privado do Supabase
+antes de upgrades stateful. O workspace Railway atual não autoriza backups
+nativos de volume. Secrets ficam apenas no Doppler e nas variáveis do Railway,
+nunca no Git.
 
 ## Segurança
 
@@ -73,7 +75,7 @@ pelo Railway.
 ## Rollback
 
 1. Manter o domínio anterior inexistente até o gateway passar no domínio Railway.
-2. Fazer snapshot do volume antes de upgrades.
+2. Fazer e verificar snapshot externo do volume antes de upgrades stateful.
 3. Fixar releases de upstream; rollback de app volta ao deployment anterior.
 4. Rollback de DNS remove apenas os registros de `seo`, sem tocar loja, e-mail
    ou `hub`.

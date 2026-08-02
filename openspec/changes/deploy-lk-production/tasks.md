@@ -24,23 +24,23 @@
 
 ## 5. Railway e secrets
 
-- [ ] 5.1 Criar projeto/serviços Railway, rede privada e volume em `/app/.wrangler`.
-- [ ] 5.2 Derivar DataForSEO base64 sem impressão e configurar secrets Doppler/Railway.
-- [ ] 5.3 Configurar backups, healthchecks, restart e rollback.
-- [ ] 5.4 Publicar gateway temporário e provar núcleo sem endpoint público.
+- [x] 5.1 Criar projeto/serviços Railway, rede privada e volume em `/app/.wrangler`.
+- [x] 5.2 Derivar DataForSEO base64 sem impressão e configurar secrets Doppler/Railway.
+- [x] 5.3 Verificar snapshot externo privado, healthchecks, restart e rollback.
+- [x] 5.4 Publicar gateway temporário e provar núcleo sem endpoint público.
 
 ## 6. Configuração LK
 
-- [ ] 6.1 Criar projeto Brasil/pt-BR, configurar concorrentes diretos e referências.
-- [ ] 6.2 Montar/revisar as 100 keywords, aplicar prioridade comercial ponderada
+- [x] 6.1 Criar projeto Brasil/pt-BR, configurar concorrentes diretos e referências.
+- [x] 6.2 Montar/revisar as 100 keywords, aplicar prioridade comercial ponderada
       30/90/180 dias e configurar mobile nacional diário + desktop São Paulo semanal.
 - [ ] 6.3 Conectar GSC, OpenRouter/SAM e MCP; executar auditoria/baseline inicial.
 
 ## 7. Domínio e LK-HUB
 
 - [ ] 7.1 Associar `seo.lksneakers.com.br`, aplicar CNAME/TXT na GoDaddy e validar TLS.
-- [ ] 7.2 Criar change OpenSpec do LK-HUB, adicionar link externo por papel e testes.
-- [ ] 7.3 Publicar LK-HUB na Vercel e validar desktop/mobile autenticados.
+- [x] 7.2 Criar change OpenSpec do LK-HUB, adicionar link externo por papel e testes.
+- [x] 7.3 Publicar LK-HUB na Vercel e validar desktop/mobile autenticados.
 
 ## 8. Verificação e encerramento
 

@@ -94,11 +94,17 @@ Paulo tracking, and SAM project memory with the approved reseller taxonomy.
 
 ## Backups and rollback
 
-Enable both daily and weekly backup schedules on the core volume. Create a manual
-backup before every upstream upgrade. Application rollback uses the previous
-Railway deployment; data rollback restores the selected volume backup and then
-redeploys. Removing only the `seo` CNAME/TXT records and the LK-HUB item disables
-entry without affecting the storefront, email or other LK subdomains.
+The current Railway workspace does not authorize native volume backup schedules.
+Keep the `lk-openseo-backups` Supabase Storage bucket private and capture an
+off-platform copy of both `/state` and `/deploy` before every upstream upgrade or
+destructive migration. Verify the uploaded object's size and checksum before
+deploying. The initial production snapshot is stored under the `initial/` prefix.
+
+Application rollback uses the previous Railway deployment. Data rollback uses
+Railway volume file management to restore the selected private snapshot and then
+redeploys. Do not perform a stateful upgrade without this recovery point. Removing
+only the `seo` CNAME/TXT records and the LK-HUB item disables entry without
+affecting the storefront, email or other LK subdomains.
 
 ## Upstream updates
 
