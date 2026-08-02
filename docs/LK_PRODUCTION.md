@@ -17,8 +17,10 @@ proxy for `open-seo` or `scheduler`. Keep all three services in Railway US East
 so private core/scheduler traffic does not cross regions.
 
 The core uses `Dockerfile.railway-core`, which compiles Vite with Railway's build
-resources. Runtime startup only validates configuration, migrates SQLite and
-serves the prebuilt bundle, keeping cold starts inside the instance memory limit.
+resources. Runtime startup validates configuration, writes only the allowlisted
+worker bindings to an ephemeral mode-0600 `.dev.vars`, migrates SQLite and serves
+the prebuilt bundle. Secrets never enter an image layer or the persistent volume,
+and cold starts stay inside the instance memory limit.
 When Railway injects `RAILWAY_ENVIRONMENT_ID`, Vite also accepts the platform's
 `healthcheck.railway.app` host so the private deployment can pass promotion.
 
