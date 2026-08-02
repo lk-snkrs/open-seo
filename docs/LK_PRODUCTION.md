@@ -65,6 +65,13 @@ redirect URI:
 The gateway session cookie intentionally uses `SameSite=Lax` so the top-level
 OAuth callback can retain the authenticated session.
 
+## LK workspace seed
+
+After the first successful core migration, run `pnpm seed:lk-production` inside
+the core service. The idempotent seed creates the Brasil/Portuguese project,
+the curated 100-keyword set, daily mobile national tracking, weekly desktop São
+Paulo tracking, and SAM project memory with the approved reseller taxonomy.
+
 ## Verification
 
 1. Confirm `gateway` returns `200` at `/healthz` and redirects anonymous HTML to
