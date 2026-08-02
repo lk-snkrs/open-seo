@@ -16,6 +16,10 @@ volume must be mounted at `/app/.wrangler`; do not expose a Railway domain or TC
 proxy for `open-seo` or `scheduler`. Keep all three services in Railway US East
 so private core/scheduler traffic does not cross regions.
 
+The core uses `Dockerfile.railway-core`, which compiles Vite with Railway's build
+resources. Runtime startup only validates configuration, migrates SQLite and
+serves the prebuilt bundle, keeping cold starts inside the instance memory limit.
+
 ## Environment variables
 
 ### Core

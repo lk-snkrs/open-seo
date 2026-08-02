@@ -80,6 +80,17 @@ jobs:
           cache-from: type=gha,scope=selfhost
           cache-to: type=gha,mode=max,scope=selfhost
 
+      - name: Build LK Railway core Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.railway-core
+          push: false
+          load: false
+          platforms: linux/amd64
+          cache-from: type=gha,scope=lk-railway-core
+          cache-to: type=gha,mode=max,scope=lk-railway-core
+
       - name: Build LK gateway Docker image
         uses: docker/build-push-action@v6
         with:

@@ -30,6 +30,12 @@ O volume em `/app/.wrangler` preserva D1, KV, R2 e estado dos workflows locais.
 Supabase/Postgres fica reservado para uma migração futura baseada em volume,
 concorrência ou recuperação, não como requisito especulativo.
 
+### Build no estágio de imagem
+
+O bundle Vite é compilado durante o build da imagem Railway. A instância de
+runtime executa apenas preflight, migrações idempotentes e o servidor do bundle
+pré-compilado, evitando exceder a memória disponível durante cold starts.
+
 ### Credenciais separadas por ator
 
 Usuários usam Supabase Auth e allowlist. MCP usa `OPEN_SEO_MCP_TOKEN`. Scheduler
