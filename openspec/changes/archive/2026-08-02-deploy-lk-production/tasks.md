@@ -34,7 +34,7 @@
 - [x] 6.1 Criar projeto Brasil/pt-BR, configurar concorrentes diretos e referências.
 - [x] 6.2 Montar/revisar as 100 keywords, aplicar prioridade comercial ponderada
       30/90/180 dias e configurar mobile nacional diário + desktop São Paulo semanal.
-- [ ] 6.3 Conectar GSC, OpenRouter/SAM e MCP; executar auditoria/baseline inicial.
+- [x] 6.3 Conectar GSC, OpenRouter/SAM e MCP; executar auditoria/baseline inicial.
 
 ## 7. Domínio e LK-HUB
 
@@ -44,7 +44,7 @@
 
 ## 8. Verificação e encerramento
 
-- [ ] 8.1 Provar login allowlisted, bloqueio não autorizado, HTTP/WS e persistência pós-redeploy.
-- [ ] 8.2 Provar DataForSEO, GSC, SAM, MCP, auditoria e rank checks manual/agendado.
-- [ ] 8.3 Atualizar Brain com arquitetura, taxonomia de concorrentes e receipt live.
-- [ ] 8.4 Arquivar mudanças OpenSpec somente após toda evidência live; commit e push finais.
+- [x] 8.1 Provar login allowlisted, bloqueio não autorizado, HTTP/WS e persistência pós-redeploy.
+- [x] 8.2 Provar DataForSEO, GSC, SAM, MCP, auditoria e rank checks manual/agendado.
+- [x] 8.3 Atualizar Brain com arquitetura, taxonomia de concorrentes e receipt live.
+- [x] 8.4 Arquivar mudanças OpenSpec somente após toda evidência live; commit e push finais.

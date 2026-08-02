@@ -109,6 +109,11 @@ Rollback por deployment anterior no Railway e restauração do snapshot externo
 no volume. O DNS `seo` é isolado; removê-lo não afeta nenhuma outra superfície
 LK. O link do HUB é uma mudança independente e reversível.
 
+## Evidence
+
+O receipt canônico da entrega está no Hermes Brain em
+`areas/lk/receipts/lk-openseo-production-2026-08-02.md`.
+
 ## Open Questions
 
 Nenhuma. E-mails autorizados serão derivados dos usuários ativos dos papéis
