@@ -1,0 +1,19 @@
+schema: spec-driven
+
+context: |
+  Fork LK Sneakers do OpenSEO v0.1.3, mantido próximo do upstream every-app/open-seo.
+  Produção: Docker no Railway, núcleo privado, gateway autenticado público em
+  https://seo.lksneakers.com.br e dados D1/SQLite persistidos em volume.
+  Autenticação humana usa Supabase Auth LK + allowlist explícita. MCP e crons usam
+  credenciais de máquina separadas. Secrets vivem no Doppler lc-keys/prd.
+  Artefatos em português (pt-BR); código e commits em inglês convencional.
+  Mudanças devem manter compatibilidade SQLite/Postgres quando tocarem o domínio
+  de dados e minimizar divergência do upstream.
+
+rules:
+  proposal:
+    - Declarar non-goals, impacto no upstream e writes externos necessários.
+  design:
+    - Incluir ameaça, rollback, persistência, backup e verificação live.
+  tasks:
+    - Separar implementação local, provisionamento externo e verificação final.
