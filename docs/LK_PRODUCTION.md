@@ -13,7 +13,8 @@ public application origin is `https://seo.lksneakers.com.br`.
 
 Set each service's Railway config-file path to the matching file above. The core
 volume must be mounted at `/app/.wrangler`; do not expose a Railway domain or TCP
-proxy for `open-seo` or `scheduler`.
+proxy for `open-seo` or `scheduler`. Keep all three services in Railway US East
+so private core/scheduler traffic does not cross regions.
 
 ## Environment variables
 

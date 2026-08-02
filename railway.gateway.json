@@ -12,6 +12,11 @@
     ]
   },
   "deploy": {
+    "multiRegionConfig": {
+      "us-east4-eqdc4a": {
+        "numReplicas": 1
+      }
+    },
     "healthcheckPath": "/healthz",
     "healthcheckTimeout": 180,
     "restartPolicyType": "ALWAYS",
