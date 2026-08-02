@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import {
   createServer,
   type IncomingMessage,
@@ -35,6 +35,9 @@ type SessionAccess =
   | { status: "forbidden" }
   | { status: "allowed"; email: string };
 
+const LOGIN_CSRF_COOKIE_NAME = "__Host-lk_open_seo_csrf";
+const LOGIN_CSRF_TTL_SECONDS = 600;
+
 function setSecurityHeaders(response: ServerResponse): void {
   response.setHeader("Referrer-Policy", "no-referrer");
   response.setHeader("X-Content-Type-Options", "nosniff");
@@ -67,6 +70,30 @@ function send(
   response.setHeader("Content-Type", contentType);
   response.setHeader("Cache-Control", "no-store");
   response.end(body);
+}
+
+function loginCsrfCookie(token: string): string {
+  return `${LOGIN_CSRF_COOKIE_NAME}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${LOGIN_CSRF_TTL_SECONDS}`;
+}
+
+function expiredLoginCsrfCookie(): string {
+  return `${LOGIN_CSRF_COOKIE_NAME}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
+}
+
+function sendLoginPage(
+  response: ServerResponse,
+  status: number,
+  message?: string,
+): void {
+  const csrfToken = randomBytes(32).toString("base64url");
+  response.setHeader("Set-Cookie", loginCsrfCookie(csrfToken));
+  setLoginContentSecurityPolicy(response);
+  send(
+    response,
+    status,
+    renderLoginPage(csrfToken, message),
+    "text/html; charset=utf-8",
+  );
 }
 
 function redirect(response: ServerResponse, location: string): void {
@@ -135,6 +162,25 @@ function sameOrigin(request: IncomingMessage, config: GatewayConfig): boolean {
   return request.headers.host?.toLowerCase() === expectedHost;
 }
 
+function loginCsrfMatches(
+  request: IncomingMessage,
+  form: URLSearchParams,
+): boolean {
+  const cookieToken = readCookie(
+    request.headers.cookie,
+    LOGIN_CSRF_COOKIE_NAME,
+  );
+  const formToken = form.get("_csrf");
+  if (!cookieToken || !formToken) return false;
+
+  const cookieBuffer = Buffer.from(cookieToken);
+  const formBuffer = Buffer.from(formToken);
+  return (
+    cookieBuffer.length === formBuffer.length &&
+    timingSafeEqual(cookieBuffer, formBuffer)
+  );
+}
+
 function wantsHtml(request: IncomingMessage): boolean {
   return (
     request.method === "GET" &&
@@ -173,13 +219,19 @@ export function createGatewayServer(
           redirect(response, "/");
           return;
         }
-        setLoginContentSecurityPolicy(response);
-        send(response, 200, renderLoginPage(), "text/html; charset=utf-8");
+        sendLoginPage(response, 200);
         return;
       }
 
       if (request.method === "POST" && path === "/login") {
-        if (!sameOrigin(request, config)) {
+        let form: URLSearchParams;
+        try {
+          form = await readForm(request);
+        } catch {
+          send(response, 400, "Requisição inválida.");
+          return;
+        }
+        if (!sameOrigin(request, config) && !loginCsrfMatches(request, form)) {
           send(response, 403, "Origem inválida.");
           return;
         }
@@ -187,14 +239,6 @@ export function createGatewayServer(
         if (!dependencies.allowLoginAttempt(clientAddress)) {
           response.setHeader("Retry-After", "60");
           send(response, 429, "Muitas tentativas. Aguarde um minuto.");
-          return;
-        }
-
-        let form: URLSearchParams;
-        try {
-          form = await readForm(request);
-        } catch {
-          send(response, 400, "Requisição inválida.");
           return;
         }
         const email = (form.get("email") ?? "").trim().toLowerCase();
@@ -205,13 +249,7 @@ export function createGatewayServer(
           !password ||
           password.length > 1024
         ) {
-          setLoginContentSecurityPolicy(response);
-          send(
-            response,
-            400,
-            renderLoginPage("Preencha e-mail e senha."),
-            "text/html; charset=utf-8",
-          );
+          sendLoginPage(response, 400, "Preencha e-mail e senha.");
           return;
         }
 
@@ -225,13 +263,7 @@ export function createGatewayServer(
             status === 401
               ? "E-mail ou senha inválidos."
               : "Login temporariamente indisponível.";
-          setLoginContentSecurityPolicy(response);
-          send(
-            response,
-            status,
-            renderLoginPage(message),
-            "text/html; charset=utf-8",
-          );
+          sendLoginPage(response, status, message);
           return;
         }
 
@@ -247,10 +279,10 @@ export function createGatewayServer(
           Date.now(),
           config.sessionTtlSeconds,
         );
-        response.setHeader(
-          "Set-Cookie",
+        response.setHeader("Set-Cookie", [
           sessionCookie(token, config.sessionTtlSeconds),
-        );
+          expiredLoginCsrfCookie(),
+        ]);
         redirect(response, "/");
         return;
       }

@@ -74,8 +74,10 @@ executam testes e snapshot externo do volume antes do deploy.
 
 - Bypass do gateway: prevenido pela ausência de domínio/TCP público no núcleo.
 - Roubo de cookie: mitigado por flags seguras, TLS e sessão curta/refresh server-side.
-- CSRF no login/logout: origem explícita precisa coincidir; quando Safari omitir
-  `Origin`, o fallback exige `Sec-Fetch-Site: same-origin` e o host público exato.
+- CSRF no login/logout: origem explícita precisa coincidir; quando Safari ou um
+  navegador embutido omitir metadados confiáveis, o login exige um token aleatório
+  emitido no HTML e em cookie `__Host-` seguro. O fallback por Fetch Metadata ainda
+  exige `Sec-Fetch-Site: same-origin` e o host público exato.
 - E-mail válido fora do time: allowlist falha fechado.
 - Vazamento de token MCP/cron: secrets separados, sem logs, rotacionáveis.
 - SSRF/proxy aberto: destino do proxy é constante e privado; Host não vem do usuário.

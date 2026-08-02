@@ -1,4 +1,4 @@
-export function renderLoginPage(message?: string): string {
+export function renderLoginPage(csrfToken: string, message?: string): string {
   const notice = message ? `<p class="notice" role="alert">${message}</p>` : "";
 
   return `<!doctype html>
@@ -29,6 +29,7 @@ export function renderLoginPage(message?: string): string {
     <p class="subtitle">Entre com sua conta autorizada do LK-HUB.</p>
     ${notice}
     <form method="post" action="/login">
+      <input type="hidden" name="_csrf" value="${csrfToken}">
       <label for="email">E-mail</label>
       <input id="email" name="email" type="email" autocomplete="username" required maxlength="254">
       <label for="password">Senha</label>

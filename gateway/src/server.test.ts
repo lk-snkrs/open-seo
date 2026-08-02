@@ -72,6 +72,15 @@ function sessionCookie(email = "seo@lksneakers.com.br") {
   return `${SESSION_COOKIE_NAME}=${token}`;
 }
 
+async function loginCsrf(baseUrl: string) {
+  const response = await fetch(`${baseUrl}/login`);
+  const html = await response.text();
+  const token = html.match(/name="_csrf" value="([A-Za-z0-9_-]+)"/)?.[1];
+  const cookie = response.headers.get("set-cookie")?.split(";", 1)[0];
+  if (!token || !cookie) throw new Error("Login CSRF token was not issued");
+  return { token, cookie, setCookie: response.headers.get("set-cookie") ?? "" };
+}
+
 async function postFormWithoutFetchDefaults(
   baseUrl: string,
   headers: Record<string, string>,
@@ -104,6 +113,18 @@ async function postFormWithoutFetchDefaults(
 }
 
 describe("gateway request boundary", () => {
+  it("issues a host-only secure CSRF token with the login form", async () => {
+    const { baseUrl } = await start();
+
+    const csrf = await loginCsrf(baseUrl);
+
+    expect(csrf.setCookie).toContain("__Host-lk_open_seo_csrf=");
+    expect(csrf.setCookie).toContain("HttpOnly");
+    expect(csrf.setCookie).toContain("Secure");
+    expect(csrf.setCookie).toContain("SameSite=Lax");
+    expect(csrf.setCookie).not.toContain("Domain=");
+  });
+
   it("redirects anonymous HTML and rejects anonymous API without forwarding", async () => {
     const { baseUrl, proxyHttp } = await start();
 
@@ -185,6 +206,35 @@ describe("gateway request boundary", () => {
     });
 
     expect(status).toBe(303);
+    expect(signIn).toHaveBeenCalledOnce();
+  });
+
+  it("accepts embedded Safari login with a valid CSRF token when origin metadata is unavailable", async () => {
+    const signIn = vi.fn(async (email: string) => ({ id: "user-1", email }));
+    const { baseUrl } = await start({ signIn });
+    const csrf = await loginCsrf(baseUrl);
+
+    const response = await fetch(`${baseUrl}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Cookie: csrf.cookie,
+      },
+      body: new URLSearchParams({
+        email: "seo@lksneakers.com.br",
+        password: "correct horse battery staple",
+        _csrf: csrf.token,
+      }),
+      redirect: "manual",
+    });
+
+    expect(response.status).toBe(303);
+    expect(response.headers.get("set-cookie")).toContain(
+      `${SESSION_COOKIE_NAME}=`,
+    );
+    expect(response.headers.get("set-cookie")).toContain(
+      "__Host-lk_open_seo_csrf=;",
+    );
     expect(signIn).toHaveBeenCalledOnce();
   });
 

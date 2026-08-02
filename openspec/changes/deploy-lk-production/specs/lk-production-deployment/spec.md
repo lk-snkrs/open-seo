@@ -36,12 +36,12 @@ emails in the production allowlist before proxying HTTP or WebSocket traffic.
 - **WHEN** a valid Supabase user is not in the allowlist
 - **THEN** the gateway returns `403` and never contacts the OpenSEO core
 
-#### Scenario: Safari omits Origin on same-origin login
+#### Scenario: Safari omits origin metadata on login
 
-- **WHEN** Safari submits the login form without `Origin` but with trusted
-  same-origin Fetch Metadata to the configured public host
+- **WHEN** Safari or an embedded browser submits the login form without trusted
+  origin metadata but with the matching short-lived CSRF form and `__Host-` cookie tokens
 - **THEN** the gateway accepts the CSRF boundary and continues authentication
-- **AND** cross-site, wrong-host or explicitly mismatched-origin requests remain denied
+- **AND** cross-site, wrong-host or invalid-token requests remain denied
 
 ### Requirement: Separate machine authentication
 
