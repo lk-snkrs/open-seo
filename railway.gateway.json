@@ -21,7 +21,7 @@
     "healthcheckTimeout": 180,
     "restartPolicyType": "ALWAYS",
     "restartPolicyMaxRetries": 10,
-    "overlapSeconds": "30",
-    "drainingSeconds": "30"
+    "overlapSeconds": 30,
+    "drainingSeconds": 30
   }
 }
