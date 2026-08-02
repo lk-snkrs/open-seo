@@ -11,6 +11,7 @@ pnpm exec tsx scripts/selfhost-preflight.ts
 umask 077
 runtime_env_file="/app/dist/server/.dev.vars"
 : > "$runtime_env_file"
+chmod 600 "$runtime_env_file"
 for name in \
   AUTH_MODE \
   DATAFORSEO_API_KEY \
