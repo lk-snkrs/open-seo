@@ -97,6 +97,11 @@ and SHALL report their readiness without exposing secret values.
 - **WHEN** an authorized operator runs the smoke checks
 - **THEN** DataForSEO returns live data, GSC returns the LK property, SAM responds and MCP lists tools
 
+#### Scenario: Search Console OAuth crosses the private Railway boundary
+
+- **WHEN** the private core generates the Google authorization and callback URLs
+- **THEN** both use `https://seo.lksneakers.com.br` rather than the Railway-internal service origin
+
 ### Requirement: Branded production endpoint
 
 The authenticated gateway SHALL serve `https://seo.lksneakers.com.br` with valid

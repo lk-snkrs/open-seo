@@ -9,7 +9,8 @@ function getForwardedProtocol(request: Request) {
 
 export function getPublicOrigin(request: Request) {
   const url = new URL(request.url);
-  if (url.protocol === "https:") {
+  const railwayPrivateOrigin = url.hostname.endsWith(".railway.internal");
+  if (url.protocol === "https:" && !railwayPrivateOrigin) {
     return url.origin;
   }
 

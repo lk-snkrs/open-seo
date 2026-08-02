@@ -31,6 +31,20 @@ describe("getPublicOrigin", () => {
 
     expect(getPublicOrigin(request)).toBe("https://app.openseo.so");
   });
+
+  it("uses the forwarded public origin when Railway rewrites a private URL to https", () => {
+    const request = new Request(
+      "https://open-seo.railway.internal:3001/api/gsc/oauth/callback",
+      {
+        headers: {
+          "x-forwarded-proto": "https",
+          "x-forwarded-host": "seo.lksneakers.com.br",
+        },
+      },
+    );
+
+    expect(getPublicOrigin(request)).toBe("https://seo.lksneakers.com.br");
+  });
 });
 
 describe("requestWithPublicOrigin", () => {
