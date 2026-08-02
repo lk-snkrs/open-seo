@@ -9,7 +9,17 @@ import process from "node:process";
 import { getPlatformProxy } from "wrangler";
 import { drizzle } from "drizzle-orm/d1";
 import { and, eq, inArray, isNull, notInArray } from "drizzle-orm";
-import * as schema from "../src/db/schema";
+import * as appSchema from "../src/db/app.schema";
+import { samProjectMemory, samSessions } from "../src/db/sam.schema";
+import { organization, user } from "../src/db/better-auth-schema";
+
+const schema = {
+  ...appSchema,
+  samProjectMemory,
+  samSessions,
+  organization,
+  user,
+};
 
 const LOCAL_ADMIN_USER_ID = "local-admin";
 const LOCAL_ADMIN_EMAIL = "admin@localhost";
