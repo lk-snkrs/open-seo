@@ -60,11 +60,19 @@ preserve its due-time and concurrency behavior.
 Production SHALL contain one `lksneakers.com.br` project configured for Brazil
 and Portuguese, four direct reseller competitors, 100 curated unique keywords,
 national mobile daily tracking and São Paulo desktop weekly tracking.
+The initial keyword strategy SHALL prioritize commercially relevant product and
+collection clusters using normalized Shopify net sales with weights of 50% for
+the last 30 days, 30% for the last 90 days and 20% for the last 180 days.
 
 #### Scenario: User opens LK project
 
 - **WHEN** an authorized user views the configured project
 - **THEN** competitors, keyword set, both tracking recuts and saved baseline are visible
+
+#### Scenario: Commercial-priority keywords are identifiable
+
+- **WHEN** a user filters saved keywords by the managed sales-priority tag
+- **THEN** the product and collection clusters selected from the weighted 30/90/180-day Shopify baseline are visible
 
 ### Requirement: LK integrations
 

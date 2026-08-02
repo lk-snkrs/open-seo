@@ -32,8 +32,8 @@
 ## 6. Configuração LK
 
 - [ ] 6.1 Criar projeto Brasil/pt-BR, configurar concorrentes diretos e referências.
-- [ ] 6.2 Montar/revisar as 100 keywords e configurar mobile nacional diário +
-      desktop São Paulo semanal.
+- [ ] 6.2 Montar/revisar as 100 keywords, aplicar prioridade comercial ponderada
+      30/90/180 dias e configurar mobile nacional diário + desktop São Paulo semanal.
 - [ ] 6.3 Conectar GSC, OpenRouter/SAM e MCP; executar auditoria/baseline inicial.
 
 ## 7. Domínio e LK-HUB

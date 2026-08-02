@@ -8,7 +8,7 @@
 import process from "node:process";
 import { getPlatformProxy } from "wrangler";
 import { drizzle } from "drizzle-orm/d1";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull, notInArray } from "drizzle-orm";
 import * as schema from "../src/db/schema";
 
 const LOCAL_ADMIN_USER_ID = "local-admin";
@@ -78,11 +78,11 @@ export const LK_KEYWORDS = [
   "labubu original",
   "pop mart brasil",
   "crocs relampago mcqueen",
-  "nike jacquemus",
+  "nike moon shoe jacquemus",
   "on running loewe",
   "adidas wales bonner",
-  "nike x nocta",
-  "timberland premium boot",
+  "nike vomero premium",
+  "onitsuka tiger",
 
   // 20 transactional terms.
   "tênis original",
@@ -131,6 +131,34 @@ export const LK_KEYWORDS = [
   "tênis fake vs original",
 ] as const;
 
+const SALES_PRIORITY_KEYWORDS = [
+  "onitsuka tiger mexico 66",
+  "onitsuka tiger kill bill",
+  "onitsuka tiger",
+  "nike moon shoe jacquemus",
+  "new balance 204l",
+  "on running loewe",
+  "new balance 9060",
+  "nike vomero premium",
+  "nike mind 001",
+  "nike mind 002",
+  "travis scott jordan 1",
+  "adidas sl 72 og",
+  "alo yoga brasil",
+] as const;
+
+const REPLACED_BASELINE_KEYWORDS = [
+  "nike jacquemus",
+  "nike x nocta",
+  "timberland premium boot",
+] as const;
+
+const SALES_PRIORITY_TAG = {
+  name: "Prioridade vendas 50/30/20",
+  normalizedName: "prioridade-vendas-50-30-20",
+  color: "emerald",
+} as const;
+
 const PROJECT_MEMORY = `# LK Sneakers
 
 ## Negócio e objetivo
@@ -150,6 +178,8 @@ Nike, Adidas, New Balance, Artwalk, Guadalupe, Your ID e outros retailers ou mar
 ## Estratégia inicial
 - Monitorar diariamente no mobile o Brasil e semanalmente no desktop a cidade de São Paulo.
 - Priorizar 100 termos: 60 de modelos/coleções, 20 transacionais, 10 locais e 10 de marca/autenticidade.
+- Dentro do conjunto, priorizar produtos e coleções por vendas líquidas reais da Shopify: 50% para os últimos 30 dias, 30% para os últimos 90 dias e 20% para os últimos 180 dias. Recalcular os três recortes antes de recomendações estratégicas; não perpetuar uma fotografia antiga.
+- Baseline comercial de 2026-08-02: Onitsuka Tiger/Mexico 66, Nike x Jacquemus Moon Shoe, New Balance 204L/9060, Loewe x On Running, Nike Vomero Premium, Nike Mind 001/002, Travis Scott x Air Jordan 1, adidas SL 72 OG e Alo Yoga têm precedência entre clusters comparáveis.
 - Usar dados reais de DataForSEO e Search Console; não inventar volume, dificuldade, posição ou tráfego.`;
 
 type SeedDb = ReturnType<typeof drizzle<typeof schema>>;
@@ -163,7 +193,9 @@ async function main() {
     await bootstrapIdentity(db);
     const projectId = await upsertProject(db);
     await upsertOnboarding(db);
+    const savedRemoved = await removeReplacedSavedKeywords(db, projectId);
     const savedAdded = await seedSavedKeywords(db, projectId);
+    const salesPriority = await syncSalesPriorityTag(db, projectId);
     const mobileConfigId = await upsertRankConfig(db, projectId, {
       devices: "mobile",
       scheduleInterval: "daily",
@@ -184,6 +216,8 @@ async function main() {
         projectId,
         keywordCount: LK_KEYWORDS.length,
         savedAdded,
+        savedRemoved,
+        salesPriority,
         mobileAdded,
         desktopAdded,
         mobileConfigId,
@@ -306,6 +340,80 @@ async function seedSavedKeywords(db: SeedDb, projectId: string) {
   return added;
 }
 
+async function removeReplacedSavedKeywords(db: SeedDb, projectId: string) {
+  const removed = await db
+    .delete(schema.savedKeywords)
+    .where(
+      and(
+        eq(schema.savedKeywords.projectId, projectId),
+        inArray(schema.savedKeywords.keyword, REPLACED_BASELINE_KEYWORDS),
+      ),
+    )
+    .returning({ id: schema.savedKeywords.id });
+  return removed.length;
+}
+
+async function syncSalesPriorityTag(db: SeedDb, projectId: string) {
+  await db
+    .insert(schema.savedKeywordTags)
+    .values({ id: crypto.randomUUID(), projectId, ...SALES_PRIORITY_TAG })
+    .onConflictDoNothing();
+
+  const tag = await db.query.savedKeywordTags.findFirst({
+    where: and(
+      eq(schema.savedKeywordTags.projectId, projectId),
+      eq(
+        schema.savedKeywordTags.normalizedName,
+        SALES_PRIORITY_TAG.normalizedName,
+      ),
+    ),
+  });
+  if (!tag) throw new Error("Could not create sales-priority tag");
+
+  const keywordRows = await db
+    .select({ id: schema.savedKeywords.id })
+    .from(schema.savedKeywords)
+    .where(
+      and(
+        eq(schema.savedKeywords.projectId, projectId),
+        inArray(schema.savedKeywords.keyword, SALES_PRIORITY_KEYWORDS),
+      ),
+    );
+  const savedKeywordIds = keywordRows.map((row) => row.id);
+  if (savedKeywordIds.length !== SALES_PRIORITY_KEYWORDS.length) {
+    throw new Error("Sales-priority keywords are missing from the saved set");
+  }
+
+  const inserted = await db
+    .insert(schema.savedKeywordTagAssignments)
+    .values(
+      savedKeywordIds.map((savedKeywordId) => ({
+        savedKeywordId,
+        tagId: tag.id,
+      })),
+    )
+    .onConflictDoNothing()
+    .returning({ id: schema.savedKeywordTagAssignments.savedKeywordId });
+  const removed = await db
+    .delete(schema.savedKeywordTagAssignments)
+    .where(
+      and(
+        eq(schema.savedKeywordTagAssignments.tagId, tag.id),
+        notInArray(
+          schema.savedKeywordTagAssignments.savedKeywordId,
+          savedKeywordIds,
+        ),
+      ),
+    )
+    .returning({ id: schema.savedKeywordTagAssignments.savedKeywordId });
+
+  return {
+    keywordCount: savedKeywordIds.length,
+    assignmentsAdded: inserted.length,
+    assignmentsRemoved: removed.length,
+  };
+}
+
 async function upsertRankConfig(
   db: SeedDb,
   projectId: string,
@@ -360,6 +468,18 @@ async function upsertRankConfig(
 }
 
 async function seedTrackingKeywords(db: SeedDb, configId: string) {
+  await db
+    .delete(schema.rankTrackingKeywords)
+    .where(
+      and(
+        eq(schema.rankTrackingKeywords.configId, configId),
+        inArray(
+          schema.rankTrackingKeywords.keyword,
+          REPLACED_BASELINE_KEYWORDS,
+        ),
+      ),
+    );
+
   let added = 0;
   for (const keyword of LK_KEYWORDS) {
     const rows = await db

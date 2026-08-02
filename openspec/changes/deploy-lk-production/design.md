@@ -53,6 +53,14 @@ O schema upstream permite uma configuração por domínio+localização. Portant
 mobile diário será nacional Brasil e o desktop semanal será São Paulo local,
 ambos com a mesma lista de 100 keywords.
 
+### Prioridade comercial com três janelas
+
+O baseline cruza vendas líquidas por produto e coleção na Shopify e normaliza
+cada janela antes de compor o score: 50% últimos 30 dias, 30% últimos 90 dias e
+20% últimos 180 dias. Termos de SKU são consolidados em clusters SEO de modelo
+ou coleção, que recebem uma tag gerenciada no OpenSEO. O recorte deve ser
+recalculado antes de decisões estratégicas para não congelar sazonalidade.
+
 ### Fork fixado e atualizações controladas
 
 Produção inicia em `v0.1.3`. Atualizações futuras entram por PR desde `upstream`,
