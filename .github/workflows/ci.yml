@@ -38,6 +38,9 @@ jobs:
       - name: Run tests
         run: pnpm run test:ci
 
+      - name: Run LK gateway tests
+        run: pnpm --filter @lk/open-seo-gateway test
+
       # Runs the leanWorkerBundle generateBundle assertion: fails if a
       # denylisted package (dataforseo-client, autumn-js, ...) re-enters the
       # worker's eager startup graph. See vite-plugin-lean-worker-bundle.ts.
@@ -73,5 +76,16 @@ jobs:
           push: false
           load: false
           platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=selfhost
+          cache-to: type=gha,mode=max,scope=selfhost
+
+      - name: Build LK gateway Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.gateway
+          push: false
+          load: false
+          platforms: linux/amd64
+          cache-from: type=gha,scope=lk-gateway
+          cache-to: type=gha,mode=max,scope=lk-gateway

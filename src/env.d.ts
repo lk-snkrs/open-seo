@@ -44,6 +44,9 @@ declare namespace Cloudflare {
     OPENROUTER_API_KEY?: string;
     // Optional OpenRouter model slug override (defaults in openrouter.ts).
     OPENROUTER_MODEL?: string;
+
+    // Protects the private Docker scheduler bridge used by Railway Cron.
+    OPEN_SEO_CRON_SECRET?: string;
   }
 }
 

@@ -244,13 +244,22 @@ export function runSelfhostPreflight(env: EnvRecord): PreflightResult {
         },
   );
 
-  items.push({
-    key: "runtime",
-    name: "Scheduled checks",
-    level: "info",
-    message:
-      "Rank-tracking schedules do not run in Docker mode — trigger checks from the Rank Tracking page.",
-  });
+  items.push(
+    get(env, "OPEN_SEO_CRON_SECRET")
+      ? {
+          key: "runtime",
+          name: "Scheduled checks",
+          level: "ok",
+          message: "Private scheduler bridge configured",
+        }
+      : {
+          key: "runtime",
+          name: "Scheduled checks",
+          level: "info",
+          message:
+            "Rank-tracking schedules need an external trigger in Docker mode. Set OPEN_SEO_CRON_SECRET and call the private scheduler bridge, or trigger checks from the Rank Tracking page.",
+        },
+  );
 
   return { items, failed: items.some((item) => item.level === "fail") };
 }

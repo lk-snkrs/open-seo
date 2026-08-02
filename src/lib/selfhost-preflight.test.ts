@@ -91,4 +91,16 @@ describe("runSelfhostPreflight", () => {
     expect(itemFor(result, "ALLOWED_HOST")?.level).toBe("info");
     expect(itemFor(result, "ALLOWED_HOST")?.message).toContain("reverse proxy");
   });
+
+  it("reports the private scheduler bridge when its secret is configured", () => {
+    const result = runSelfhostPreflight({
+      AUTH_MODE: "local_noauth",
+      OPEN_SEO_CRON_SECRET: "c".repeat(48),
+    });
+
+    expect(itemFor(result, "Scheduled checks")?.level).toBe("ok");
+    expect(itemFor(result, "Scheduled checks")?.message).toContain(
+      "bridge configured",
+    );
+  });
 });

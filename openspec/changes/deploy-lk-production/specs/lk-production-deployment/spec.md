@@ -1,75 +1,93 @@
 ## ADDED Requirements
 
 ### Requirement: Private persistent OpenSEO core
+
 The system SHALL run the pinned OpenSEO Docker release on Railway without a
 public domain and SHALL persist `/app/.wrangler` on a backed-up volume.
 
 #### Scenario: Core cannot be reached from the internet
+
 - **WHEN** a caller attempts to resolve or connect to the core service publicly
 - **THEN** no public endpoint or TCP proxy exists for that service
 
 #### Scenario: State survives deployment
+
 - **WHEN** the OpenSEO service is redeployed after a project has been created
 - **THEN** the project, integrations and historical snapshots remain available
 
 ### Requirement: Authenticated human access
+
 The gateway SHALL authenticate with LK Supabase Auth and SHALL authorize only
 emails in the production allowlist before proxying HTTP or WebSocket traffic.
 
 #### Scenario: Authorized user enters OpenSEO
+
 - **WHEN** an allowlisted user completes a valid login
 - **THEN** the gateway creates a secure session and the OpenSEO interface loads
 
 #### Scenario: Unauthorized user is denied
+
 - **WHEN** a valid Supabase user is not in the allowlist
 - **THEN** the gateway returns `403` and never contacts the OpenSEO core
 
 ### Requirement: Separate machine authentication
+
 The gateway SHALL protect MCP with a dedicated bearer token and the core SHALL
 protect its scheduler bridge with a different cron secret.
 
 #### Scenario: MCP token is invalid
+
 - **WHEN** `/mcp` receives a missing or invalid bearer token
 - **THEN** it returns `401` without forwarding the request
 
 #### Scenario: Cron token is invalid
+
 - **WHEN** the internal scheduled-check endpoint receives a missing or invalid secret
 - **THEN** it returns `401` and starts no rank check
 
 ### Requirement: Automated rank tracking
+
 The scheduler bridge SHALL invoke the upstream scheduled-rank service and SHALL
 preserve its due-time and concurrency behavior.
 
 #### Scenario: Due configurations run
+
 - **WHEN** Railway Cron invokes the bridge with a valid secret
 - **THEN** due configurations start and non-due or already-active configurations do not duplicate
 
 ### Requirement: LK production configuration
+
 Production SHALL contain one `lksneakers.com.br` project configured for Brazil
 and Portuguese, four direct reseller competitors, 100 curated unique keywords,
 national mobile daily tracking and São Paulo desktop weekly tracking.
 
 #### Scenario: User opens LK project
+
 - **WHEN** an authorized user views the configured project
 - **THEN** competitors, keyword set, both tracking recuts and saved baseline are visible
 
 ### Requirement: LK integrations
+
 Production SHALL enable DataForSEO, Google Search Console, OpenRouter/SAM and MCP
 and SHALL report their readiness without exposing secret values.
 
 #### Scenario: Integration smoke tests pass
+
 - **WHEN** an authorized operator runs the smoke checks
 - **THEN** DataForSEO returns live data, GSC returns the LK property, SAM responds and MCP lists tools
 
 ### Requirement: Branded production endpoint
+
 The authenticated gateway SHALL serve `https://seo.lksneakers.com.br` with valid
 TLS, and LK-HUB SHALL show an external link only to `admin`, `marketing` and
 `vendas` roles.
 
 #### Scenario: Allowed HUB role opens SEO
+
 - **WHEN** an allowed role selects the OpenSEO link
 - **THEN** a new browser navigation reaches the authenticated production endpoint
 
 #### Scenario: Disallowed HUB role views navigation
+
 - **WHEN** another role loads the HUB navigation
 - **THEN** no OpenSEO item is present

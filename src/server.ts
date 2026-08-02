@@ -23,6 +23,10 @@ import {
   handleAutumnWebhookRequest,
 } from "@/server/billing/autumn-webhook";
 import { maybeSendSelfHostHeartbeat } from "@/server/lib/self-host-telemetry";
+import { handleScheduledRankChecksRequest } from "@/server/features/rank-tracking/services/scheduledRankChecksEndpoint";
+
+const INTERNAL_SCHEDULED_RANK_CHECKS_PATH =
+  "/api/internal/scheduled-rank-checks";
 
 const appFetch = createStartHandler(defaultStreamHandler);
 const openSeoOAuthProvider = createOpenSeoOAuthProvider(appFetch);
@@ -143,6 +147,14 @@ function handleFetch(
   const authMode = getAuthMode(env.AUTH_MODE);
   const publicRequest = requestWithPublicOrigin(request);
   const pathname = new URL(publicRequest.url).pathname;
+
+  if (pathname === INTERNAL_SCHEDULED_RANK_CHECKS_PATH) {
+    return handleScheduledRankChecksRequest({
+      request: publicRequest,
+      cronSecret: env.OPEN_SEO_CRON_SECRET,
+      runScheduled: () => withPgClient(() => runScheduledRankChecks(env)),
+    });
+  }
 
   if (pathname.startsWith("/agents/")) {
     return routeChatAgents(publicRequest, env);
