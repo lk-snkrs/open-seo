@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => {
   const allowedHosts = [
     env.ALLOWED_HOST,
     env.BETTER_AUTH_URL ? new URL(env.BETTER_AUTH_URL).hostname : undefined,
+    process.env.RAILWAY_ENVIRONMENT_ID ? "healthcheck.railway.app" : undefined,
   ].filter((host): host is string => Boolean(host));
   const emitSourcemaps = env.POSTHOG_SOURCEMAPS === "true";
 

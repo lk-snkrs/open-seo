@@ -19,6 +19,8 @@ so private core/scheduler traffic does not cross regions.
 The core uses `Dockerfile.railway-core`, which compiles Vite with Railway's build
 resources. Runtime startup only validates configuration, migrates SQLite and
 serves the prebuilt bundle, keeping cold starts inside the instance memory limit.
+When Railway injects `RAILWAY_ENVIRONMENT_ID`, Vite also accepts the platform's
+`healthcheck.railway.app` host so the private deployment can pass promotion.
 
 ## Environment variables
 
