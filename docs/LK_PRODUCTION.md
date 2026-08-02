@@ -27,6 +27,7 @@ When Railway injects `RAILWAY_ENVIRONMENT_ID`, Vite also accepts the platform's
 ### Core
 
 - `AUTH_MODE=local_noauth`
+- `CLOUDFLARE_INCLUDE_PROCESS_ENV=true` (forwards Railway runtime variables to the embedded Cloudflare worker)
 - `ALLOWED_HOST=open-seo.railway.internal`
 - `DATAFORSEO_API_KEY`
 - `OPENROUTER_API_KEY`
