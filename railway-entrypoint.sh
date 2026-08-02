@@ -9,7 +9,7 @@ pnpm exec tsx scripts/selfhost-preflight.ts
 # has been built, so materialize only the required bindings in the ephemeral
 # container filesystem (never the persistent volume or image layer).
 umask 077
-runtime_env_file="/app/.dev.vars"
+runtime_env_file="/app/dist/server/.dev.vars"
 : > "$runtime_env_file"
 for name in \
   AUTH_MODE \

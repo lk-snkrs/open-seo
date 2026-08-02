@@ -36,8 +36,8 @@ O bundle Vite é compilado durante o build da imagem Railway. A instância de
 runtime executa apenas preflight, migrações idempotentes e o servidor do bundle
 pré-compilado, evitando exceder a memória disponível durante cold starts.
 Como os secrets do Railway só existem no runtime, o entrypoint materializa uma
-allowlist de bindings em `.dev.vars` efêmero com permissão 0600; o arquivo não
-entra na imagem nem no volume persistente.
+allowlist de bindings em `dist/server/.dev.vars` efêmero com permissão 0600; o
+arquivo não entra na imagem nem no volume persistente.
 
 ### Credenciais separadas por ator
 
